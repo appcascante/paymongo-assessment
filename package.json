@@ -1,0 +1,66 @@
+{
+    "name": "playwright-automation-template",
+    "version": "1.0.0",
+    "description": "Production-ready Playwright automation template for Web and API Testing with TypeScript",
+    "main": "index.js",
+    "scripts": {
+        "test": "playwright test",
+        "test:headed": "playwright test --headed",
+        "test:ui": "playwright test --ui",
+        "test:web": "playwright test --project=chromium",
+        "test:api": "playwright test --project=api-tests",
+        "generate:api": "tsx scripts/generate-api-tests.ts",
+        "generate:web": "tsx scripts/generate-e2e-tests.ts",
+        "generate": "npm run generate:api && npm run generate:web",
+        "app:start": "tsx scripts/start-app.ts",
+        "app:stop": "tsx scripts/stop-app.ts",
+        "gate": "tsx scripts/gate.ts",
+        "test:api:generated": "cross-env TEST_ENV=staging playwright test \"tests/api/(get|post|put|patch|delete)-.*\\.spec\\.ts\" --project=api-tests",
+        "test:staging": "cross-env TEST_ENV=staging playwright test",
+        "test:uat": "cross-env TEST_ENV=uat playwright test",
+        "test:debug": "playwright test --debug",
+        "report": "playwright show-report",
+        "codegen": "playwright codegen",
+        "install:browsers": "playwright install",
+        "install:deps": "playwright install-deps",
+        "lint": "eslint . --ext .ts,.js",
+        "lint:fix": "eslint . --ext .ts,.js --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "keywords": [
+        "playwright",
+        "automation",
+        "testing",
+        "web-testing",
+        "api-testing",
+        "e2e",
+        "typescript"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@google/generative-ai": "^0.24.1",
+        "@playwright/test": "^1.40.0",
+        "@types/node": "^20.19.39",
+        "@typescript-eslint/eslint-plugin": "^6.7.0",
+        "@typescript-eslint/parser": "^6.7.0",
+        "ajv": "^8.20.0",
+        "ajv-formats": "^3.0.1",
+        "cross-env": "^7.0.3",
+        "dotenv": "^17.4.2",
+        "eslint": "^8.50.0",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-plugin-playwright": "^0.18.0",
+        "prettier": "^3.0.3",
+        "tsx": "^4.21.0",
+        "typescript": "^5.2.0"
+    },
+    "engines": {
+        "node": ">=16.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": ""
+    }
+}
