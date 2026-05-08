@@ -54,6 +54,7 @@ The visible `<label>` elements on this checkout page are NOT programmatically as
 - Never invent `data-testid` values that do not exist in the extracted source.
 - Never construct locators dynamically from user-controlled or random data.
 - Use one locator per concern; do not store an intermediate locator and chain unrelated assertions through it.
+- **Only assert what the scenario explicitly requires.** Do not add "bonus" intermediate assertions about button label text, placeholder strings, formatted display values (e.g. `$50.00` vs `$50`), or other dynamic UI strings that are not in the scenario contract. These are the most common source of brittle test failures.
 
 ## Extracted selectors and field metadata
 
@@ -70,7 +71,7 @@ The visible `<label>` elements on this checkout page are NOT programmatically as
 Generate, at minimum, these `test(...)` blocks inside a single `test.describe('Checkout page', () => { ... })`:
 
 1. **Renders the checkout form** — navigates to `/`, asserts each named input is visible, and asserts the submit button is visible.
-2. **Successful payment with a Luhn-valid card** — fills the form with a known-valid card (`4242 4242 4242 4242` or `4242424242424242` — both are accepted because the UI auto-formats), expiry `12/26`, cvv `123`, amount `50`, email `test@example.com`. After submitting, asserts the post-submit banner `/✅ Payment[\s\S]*/i` is visible. **Do NOT assert the inline `✅ Valid card number` hint in this test** — that hint only appears after the card field is blurred, and adding a blur step here makes the test brittle. The post-submit success banner alone is sufficient evidence the happy path worked.
+2. **Successful payment with a Luhn-valid card** — fills the form with a known-valid card (`4242 4242 4242 4242` or `4242424242424242` — both are accepted because the UI auto-formats), expiry `12/26`, cvv `123`, amount `50`, email `test@example.com`. After submitting, asserts the post-submit banner `/✅ Payment[\s\S]*/i` is visible. **Do NOT assert the inline `✅ Valid card number` hint in this test** — that hint only appears after the card field is blurred, and adding a blur step here makes the test brittle. The post-submit success banner alone is sufficient evidence the happy path worked. **Do NOT assert the submit button's text content** (e.g. `toHaveText('Pay $50.00')` or `toHaveText('Pay $50')`). The button label format (`Pay $<amount>`, `Pay $50`, `Pay $50.00`, `Complete Payment`, `Processing Payment...`) is dynamic and not part of this scenario's contract — only assert that the button is visible and clickable, then click it and assert the post-submit banner.
 3. **Card validation failure on blur** — fills `cardNumber` with `1234567890123456`, blurs the field, and asserts the inline `❌ Invalid card number` message becomes visible without submitting the form.
 4. **Submit blocked when card is invalid (negative path)** — fills every required field but uses an invalid Luhn card such as `1234567890123456`, blurs the card field so the inline `❌ Invalid card number` hint renders, then submits the form. Assert that the post-submit banner `❌ Please enter a valid card number` becomes visible. This negative test verifies the client-side submit guard prevents a failed-validation card from reaching the API.
 
