@@ -6,9 +6,6 @@ results.xml
 screenshots/
 videos/
 coverage/
-scripts/generated_test/
-tests/api/
-tests/web/
 scripts/.app-pids.json
 scripts/.app-logs/
 .env

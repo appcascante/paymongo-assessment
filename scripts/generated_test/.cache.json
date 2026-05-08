@@ -1,0 +1,41 @@
+{
+  "api": {
+    "POST /api/checkout": {
+      "hash": "1107ac8b43553cc8899bd133397cc58c886d7ebc4aee1b5561e362c88778e3e6",
+      "modelName": "gemini-2.5-flash-lite",
+      "generatedTestPath": "/app/scripts/generated_test/api/post-api-checkout.spec.ts",
+      "runnableTestPath": "/app/tests/api/post-api-checkout.spec.ts",
+      "generatedAt": "2026-05-08T08:42:09.492Z"
+    },
+    "GET /api/health": {
+      "hash": "8898aa245aa098bae5e6eb95ed25c63ae6f38ce31bbff8230213badde46052e6",
+      "modelName": "gemini-2.5-flash-lite",
+      "generatedTestPath": "/app/scripts/generated_test/api/get-api-health.spec.ts",
+      "runnableTestPath": "/app/tests/api/get-api-health.spec.ts",
+      "generatedAt": "2026-05-08T08:42:13.214Z"
+    },
+    "POST /api/validate-card": {
+      "hash": "02f26d9e0e5f1e08a5aac29e11938dcf3e1e8d6772e8c3cc67d2bb6293f85b49",
+      "modelName": "gemini-2.5-flash-lite",
+      "generatedTestPath": "/app/scripts/generated_test/api/post-api-validate-card.spec.ts",
+      "runnableTestPath": "/app/tests/api/post-api-validate-card.spec.ts",
+      "generatedAt": "2026-05-08T08:42:27.864Z"
+    },
+    "POST /api/validate-email": {
+      "hash": "142807a0b8759c206d5b1120cbd7059dcb92bb21fc2fe3493fa58a6048af7b3f",
+      "modelName": "gemini-2.5-flash-lite",
+      "generatedTestPath": "/app/scripts/generated_test/api/post-api-validate-email.spec.ts",
+      "runnableTestPath": "/app/tests/api/post-api-validate-email.spec.ts",
+      "generatedAt": "2026-05-08T08:42:33.303Z"
+    }
+  },
+  "web": {
+    "checkout": {
+      "hash": "fb072748b7658dd630db584ebbc83fcaa6fc48df2e07c44b375494f691812a13",
+      "modelName": "gemini-2.5-flash-lite",
+      "generatedTestPath": "/app/scripts/generated_test/web/checkout.spec.ts",
+      "runnableTestPath": "/app/tests/web/checkout.spec.ts",
+      "generatedAt": "2026-05-08T08:42:43.043Z"
+    }
+  }
+}
