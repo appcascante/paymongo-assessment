@@ -1,0 +1,41 @@
+{
+  "api": {
+    "POST /api/checkout": {
+      "hash": "c0eb2426de943bc04c42ff8cfeb5d55c5a6e8dc2b7b5d90225b6fa94d5749bf8",
+      "modelName": "gemini-2.5-flash",
+      "generatedTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/scripts/generated_test/api/post-api-checkout.spec.ts",
+      "runnableTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/tests/api/post-api-checkout.spec.ts",
+      "generatedAt": "2026-05-08T10:28:59.418Z"
+    },
+    "GET /api/health": {
+      "hash": "bf7855437ea37d911957a6923ab7ce945a165924eb34957050c6ee3f6d902a4c",
+      "modelName": "gemini-2.5-flash",
+      "generatedTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/scripts/generated_test/api/get-api-health.spec.ts",
+      "runnableTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/tests/api/get-api-health.spec.ts",
+      "generatedAt": "2026-05-08T10:29:04.953Z"
+    },
+    "POST /api/validate-card": {
+      "hash": "dd52bce8071fe184aee62f6380a8d610aa62d7b624a1fee28e37bd9d56486070",
+      "modelName": "gemini-2.5-flash",
+      "generatedTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/scripts/generated_test/api/post-api-validate-card.spec.ts",
+      "runnableTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/tests/api/post-api-validate-card.spec.ts",
+      "generatedAt": "2026-05-08T10:29:16.023Z"
+    },
+    "POST /api/validate-email": {
+      "hash": "c1686cdf5c007f07071486c7870e2c227a171aedc6a04903033af2fc92582b50",
+      "modelName": "gemini-2.5-flash",
+      "generatedTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/scripts/generated_test/api/post-api-validate-email.spec.ts",
+      "runnableTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/tests/api/post-api-validate-email.spec.ts",
+      "generatedAt": "2026-05-08T10:29:59.440Z"
+    }
+  },
+  "web": {
+    "checkout": {
+      "hash": "827db7a184e8165cb6b1f7f14a86eb3fd4fcf20708aa1c6a2cc7748b9a091233",
+      "modelName": "gemini-2.5-flash",
+      "generatedTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/scripts/generated_test/web/checkout.spec.ts",
+      "runnableTestPath": "/home/runner/work/paymongo-assessment/paymongo-assessment/paymongo-assessment/tests/web/checkout.spec.ts",
+      "generatedAt": "2026-05-08T10:30:13.300Z"
+    }
+  }
+}
