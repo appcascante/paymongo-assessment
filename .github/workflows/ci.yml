@@ -1,0 +1,202 @@
+name: Playwright AI-Generated Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      runtime:
+        description: "Where to run the gate"
+        type: choice
+        required: true
+        default: native
+        options:
+          - native   # fast: ubuntu-latest + setup-go + setup-node
+          - docker   # reproducible: build & run the project Dockerfile image
+
+env:
+  # Both repos are checked out side-by-side:
+  #   GITHUB_WORKSPACE/paymongo-assessment             (this repo)
+  #   GITHUB_WORKSPACE/paymongo-assessment-app-code    (app under test)
+  APP_CODE_DIR: ${{ github.workspace }}/paymongo-assessment-app-code
+  STAGING_API_URL: http://localhost:8080
+  STAGING_BASE_URL: http://localhost:3000
+  APP_READY_TIMEOUT_MS: "180000"
+  PW_TEST_HTML_REPORT_OPEN: "never"
+  # GEMINI_API_KEY must be stored as a repository secret
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+  GENERATOR_CONCURRENCY: ${{ vars.GENERATOR_CONCURRENCY || '1' }}
+  TEST_ENV: staging
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Native job — default for push / pull_request, and when workflow_dispatch
+  # input `runtime=native` is selected.
+  # ─────────────────────────────────────────────────────────────────────────────
+  test-native:
+    name: Generate & Run Tests (native)
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.runtime == 'native' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout assessment repo
+        uses: actions/checkout@v4
+        with:
+          path: paymongo-assessment
+
+      - name: Checkout paymongo-assessment-app-code repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.APP_CODE_REPO || 'paymongo/paymongo-assessment-app-code' }}
+          path: paymongo-assessment-app-code
+          # token: ${{ secrets.APP_CODE_TOKEN }}  # uncomment if private repo
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+          cache: true
+          cache-dependency-path: |
+            paymongo-assessment-app-code/go.sum
+            paymongo-assessment-app-code/go.mod
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: paymongo-assessment/package-lock.json
+
+      - name: Install test dependencies
+        working-directory: paymongo-assessment
+        run: npm ci
+
+      - name: Install paymongo-assessment-app-code dependencies
+        working-directory: paymongo-assessment-app-code
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Install Playwright browsers
+        working-directory: paymongo-assessment
+        run: npx playwright install --with-deps chromium
+
+      - name: Run quality gate (start app → generate → test → stop)
+        working-directory: paymongo-assessment
+        run: npm run gate
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-native
+          path: paymongo-assessment/playwright-report/
+          retention-days: 14
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-native
+          path: paymongo-assessment/test-results/results.xml
+          retention-days: 14
+
+      - name: Upload app logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs-native
+          path: paymongo-assessment/scripts/.app-logs/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Docker job — opt-in via `workflow_dispatch` input `runtime=docker`.
+  # Builds the project Dockerfile (Playwright + Go) and executes the same
+  # `npm run gate` orchestrator inside it. Demonstrates a fully reproducible
+  # CI image identical to what developers run locally.
+  # ─────────────────────────────────────────────────────────────────────────────
+  test-docker:
+    name: Generate & Run Tests (docker)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.runtime == 'docker' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout assessment repo
+        uses: actions/checkout@v4
+        with:
+          path: paymongo-assessment
+
+      - name: Checkout paymongo-assessment-app-code repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.APP_CODE_REPO || 'paymongo/paymongo-assessment-app-code' }}
+          path: paymongo-assessment-app-code
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build gate image
+        uses: docker/build-push-action@v6
+        with:
+          context: paymongo-assessment
+          file: paymongo-assessment/Dockerfile
+          tags: paymongo-gate:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run quality gate inside container
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          docker run --rm \
+            --network host \
+            -v "${{ github.workspace }}/paymongo-assessment:/app" \
+            -v /app/node_modules \
+            -v "${{ github.workspace }}/paymongo-assessment-app-code:/app-code" \
+            -v /app-code/node_modules \
+            -v /app-code/.next \
+            -e APP_CODE_DIR=/app-code \
+            -e STAGING_API_URL=http://localhost:8080 \
+            -e STAGING_BASE_URL=http://localhost:3000 \
+            -e APP_READY_TIMEOUT_MS=180000 \
+            -e PW_TEST_HTML_REPORT_OPEN=never \
+            -e TEST_ENV=staging \
+            -e GEMINI_MODEL=${{ vars.GEMINI_MODEL || 'gemini-2.5-flash-lite' }} \
+            -e GENERATOR_CONCURRENCY=${{ vars.GENERATOR_CONCURRENCY || '4' }} \
+            -e GEMINI_API_KEY \
+            -e CI=true \
+            paymongo-gate:ci \
+            bash -lc "npm ci && (cd /app-code && (test -f package-lock.json && npm ci || npm install --no-audit --no-fund)) && npm run gate"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-docker
+          path: paymongo-assessment/playwright-report/
+          retention-days: 14
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-docker
+          path: paymongo-assessment/test-results/results.xml
+          retention-days: 14
+
+      - name: Upload app logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs-docker
+          path: paymongo-assessment/scripts/.app-logs/
+          retention-days: 7
